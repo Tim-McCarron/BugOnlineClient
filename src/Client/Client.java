@@ -6,34 +6,76 @@
 package Client;
 
 import Unit.Player;
-import java.io.StringReader;
-import java.util.ArrayList;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.HashMap;
 
 /**
  *
  * @author Able
  */
-public class Client {
+public class Client implements Runnable {
     
-    private static ArrayList<Player> list = new ArrayList();
+    private static HashMap<String, Player> list = new HashMap();
     private static Player me;
-//    JSONParser parser = Json.createParser(new StringReader("[{\"id\": 2, \"x\":15, \"y\":15, \"name\":\"duck2\"}]"));
-    // always put da poppa first (me)
-    public static ArrayList<Player> getPlayerList() {
-        list.clear();
-        
-        list.add(me);
-//        for (int i = 0; list.size() - 1; i++) {
-//            list.add(me)
-//        }
+    private static int port = 9999;
+    String serverName = "127.0.0.1";
+    private Socket sock;
+    private OutputStream outToServer;
+    private DataOutputStream out;
+    private boolean connected = false;
+    InputStream inFromServer;
+    DataInputStream in;
+    
+    public void run() {
+        try {
+            while (connected) {
+                out = new DataOutputStream(sock.getOutputStream());
+                // mod with your own payload below
+                out.writeUTF("put your json here....");
+                inFromServer = sock.getInputStream();
+                in = new DataInputStream(inFromServer);
+                System.out.println(in.readUTF());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public HashMap<String, Player> getPlayerList() {
         return list;
     }
     
-    public Player getMe() {
-    
-        return me;
+    public boolean connect() {
+        try {
+            sock = new Socket(serverName, port);
+            outToServer = sock.getOutputStream();
+            out = new DataOutputStream(outToServer);
+            connected = true;
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     
+    public Socket getClientSock() {
+        return sock;
+    }
     
+    public void close() {
+        try {
+            sock.close();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public Player getMe() {
+        return me;
+    }
     
 }

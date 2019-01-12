@@ -10,8 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import javax.imageio.ImageIO;
+import java.util.HashMap;
 import javax.swing.JPanel;
 
 /*
@@ -38,11 +37,10 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     private final int RIGHT = 68;
     
     private BufferedImage background;
-    private ArrayList<Unit> sprites = new ArrayList();
-    private ArrayList<Player> players = new ArrayList();
+    private HashMap<String, Unit> sprites = new HashMap<String, Unit>();
+    private HashMap<String, Player> players = new HashMap<String, Player>();
     private Graphics2D g;
-    
-    
+    private Client client;
     
     public void run() {
         
@@ -56,27 +54,33 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
         background = manager.getCurrent();
 //        sprites.add(new Player(50, 50, "Player1", "../resources/duck-R.png", 1, true));
 	// game loop
-	while (running) {
-			
-            start = System.nanoTime();
-			
-            drawToScreen();
-            draw();
-            
-			
-            elapsed = System.nanoTime() - start;
-			
-            wait = targetTime - elapsed / 1000000;
-            if (wait < 0) wait = 5;
-			
-            try {
-                Thread.sleep(wait);
-            } catch(Exception e) {
-                e.printStackTrace();
-            }
-			
-	}
+        client = new Client();
+        client.connect();
+        Thread connection = new Thread(client);
+        connection.start();
         
+        if (client.connect()) {
+            
+            while (running) {
+                start = System.nanoTime();
+                // put tick code in here
+                players = client.getPlayerList();
+                
+                drawToScreen();
+                draw();
+
+                // end tick code
+                elapsed = System.nanoTime() - start;
+                wait = targetTime - elapsed / 1000000;
+                if (wait < 0) wait = 5;
+
+                try {
+                    Thread.sleep(wait);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
     
     public GameWindow() {
@@ -115,7 +119,6 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     private void update() {
     
         players.clear();
-        players = Client.getPlayerList();
     
     }
     
