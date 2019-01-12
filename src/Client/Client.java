@@ -5,6 +5,7 @@
  */
 package Client;
 
+import Unit.*;
 import Unit.Player;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -27,8 +28,9 @@ public class Client implements Runnable {
     private OutputStream outToServer;
     private DataOutputStream out;
     private boolean connected = false;
-    InputStream inFromServer;
-    DataInputStream in;
+    private InputStream inFromServer;
+    private DataInputStream in;
+    private HashMap<String, Unit> players;
     
     public void run() {
         try {
@@ -38,6 +40,7 @@ public class Client implements Runnable {
                 out.writeUTF("put your json here....");
                 inFromServer = sock.getInputStream();
                 in = new DataInputStream(inFromServer);
+                
                 System.out.println(in.readUTF());
             }
         } catch (Exception e) {
