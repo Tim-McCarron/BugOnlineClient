@@ -13,14 +13,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
-
+import Util.*;
 /**
  *
  * @author Able
  */
 public class Client implements Runnable {
     
-    private static HashMap<String, Player> list = new HashMap();
+//    private static HashMap<String, Player> list = new HashMap();
     private static Player me;
     private static int port = 9999;
     String serverName = "127.0.0.1";
@@ -30,7 +30,14 @@ public class Client implements Runnable {
     private boolean connected = false;
     private InputStream inFromServer;
     private DataInputStream in;
-    private HashMap<String, Unit> players;
+    private HashMap<String, Unit> list = new HashMap();
+    
+    private void assignPayload(String payload) {
+        Unit[] load = Util.parsePayload(payload);
+        for (int i = 0; i < load.length; i++) {
+            list.put(String.valueOf(load[i].getId()), load[i]);
+        }
+    }
     
     public void run() {
         try {
@@ -40,16 +47,20 @@ public class Client implements Runnable {
                 out.writeUTF("put your json here....");
                 inFromServer = sock.getInputStream();
                 in = new DataInputStream(inFromServer);
-                
-                System.out.println(in.readUTF());
+                assignPayload(in.readUTF());
+//                System.out.println(in.readUTF());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     
-    public HashMap<String, Player> getPlayerList() {
+    public HashMap<String, Unit> getUnitList() {
         return list;
+    }
+    
+    public boolean isReady() {
+        return !list.isEmpty();
     }
     
     public boolean connect() {
@@ -76,6 +87,8 @@ public class Client implements Runnable {
             e.printStackTrace();
         }
     }
+    
+//    public 
     
     public Player getMe() {
         return me;

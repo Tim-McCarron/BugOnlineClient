@@ -7,6 +7,7 @@ package MapManager;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 /**
@@ -18,7 +19,7 @@ public class MapManager {
     public ArrayList<String> paths = new ArrayList();
     public static final int MAP1 = 0;
     private BufferedImage currentMap;
-    private ArrayList<BufferedImage> spriteList = new ArrayList();
+    private HashMap<String, BufferedImage> spriteList = new HashMap();
     
     public MapManager() {
         paths.add("../resources/map.jpg");
@@ -32,7 +33,8 @@ public class MapManager {
         try {
             currentMap = ImageIO.read(getClass().getResourceAsStream(paths.get(map)));
             spriteList.clear();
-            spriteList.add(ImageIO.read(getClass().getResourceAsStream("../resources/duck-R.png")));
+            spriteList.put("player", ImageIO.read(getClass().getResourceAsStream("../resources/duck-R.png")));
+//            spriteList.add(ImageIO.read(getClass().getResourceAsStream("../resources/duck-R.png")));
             if (map == MAP1) {
                 
             }
@@ -42,7 +44,7 @@ public class MapManager {
         }
     }
     
-    public ArrayList<BufferedImage> getSprites() {
+    public HashMap<String, BufferedImage> getSprites() {
         return spriteList;
     }
     

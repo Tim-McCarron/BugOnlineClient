@@ -37,8 +37,9 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     private final int RIGHT = 68;
     
     private BufferedImage background;
-    private HashMap<String, Unit> sprites = new HashMap<String, Unit>();
-    private HashMap<String, Player> players = new HashMap<String, Player>();
+    private HashMap<String, Unit> unitList = new HashMap<String, Unit>();
+    private HashMap<String, BufferedImage> sprites = new HashMap();
+//    private HashMap<String, Player> players = new HashMap<String, Player>();
     private Graphics2D g;
     private Client client;
     
@@ -52,6 +53,7 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
 	MapManager manager = new MapManager();
         manager.load(MapManager.MAP1);
         background = manager.getCurrent();
+        sprites = manager.getSprites();
 //        sprites.add(new Player(50, 50, "Player1", "../resources/duck-R.png", 1, true));
 	// game loop
         client = new Client();
@@ -64,8 +66,10 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
             while (running) {
                 start = System.nanoTime();
                 // put tick code in here
-                players = client.getPlayerList();
-                
+                if (client.isReady()) {
+                    unitList = client.getUnitList();
+                }
+                                
                 drawToScreen();
                 draw();
 
@@ -107,18 +111,22 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     
     private void draw() {
         Graphics g2 = getGraphics();
-        for (int i = 0; i < sprites.size(); i++) {
+      
         
-//            g2.drawImage(sprites.get(i).getSprite(), sprites.get(i).getX(), sprites.get(i).getY(), null);
-            
-        }
+        unitList.forEach((k,v) -> {
+            boolean drawingMaybe = g2.drawImage(sprites.get("player"), v.getX(), v.getY(), 100, 100, null);
+            System.out.println(drawingMaybe);
+        });
+//        for (Object value : sprites.values()) {
+//            System.out.println(value.toString());
+//        }
         g2.dispose();
     
     }
     
     private void update() {
     
-        players.clear();
+//        players.clear();
     
     }
     

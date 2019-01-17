@@ -6,7 +6,7 @@
 package Util;
 
 import Unit.Unit;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  *
@@ -14,9 +14,11 @@ import java.util.HashMap;
  */
 public class Payload {
     
-    private HashMap<String, Unit> units = new HashMap<String, Unit>();
+    private ArrayList<Unit> units = new ArrayList<Unit>();
     
     
-    
+    public ArrayList<Unit> getUnits() {
+        return units;
+    }
     
 }
