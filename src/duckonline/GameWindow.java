@@ -110,12 +110,11 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     }
     
     private void draw() {
-        Graphics g2 = getGraphics();
-      
         
+        Graphics g2 = background.getGraphics();
+      
         unitList.forEach((k,v) -> {
-            boolean drawingMaybe = g2.drawImage(sprites.get("player"), v.getX(), v.getY(), 100, 100, null);
-            System.out.println(drawingMaybe);
+            g2.drawImage(sprites.get("player"), v.getX(), v.getY(), 100, 100, null);
         });
 //        for (Object value : sprites.values()) {
 //            System.out.println(value.toString());
