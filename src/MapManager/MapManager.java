@@ -20,6 +20,7 @@ public class MapManager {
     public static final int MAP1 = 0;
     private BufferedImage currentMap;
     private HashMap<String, BufferedImage> spriteList = new HashMap();
+    private BufferedImage cursor;
     
     public MapManager() {
         paths.add("../resources/map.jpg");
@@ -34,6 +35,7 @@ public class MapManager {
             currentMap = ImageIO.read(getClass().getResourceAsStream(paths.get(map)));
             spriteList.clear();
             spriteList.put("player", ImageIO.read(getClass().getResourceAsStream("../resources/duck-R.png")));
+            cursor = ImageIO.read(getClass().getResourceAsStream("../resources/select.png"));
 //            spriteList.add(ImageIO.read(getClass().getResourceAsStream("../resources/duck-R.png")));
             if (map == MAP1) {
                 
@@ -46,6 +48,10 @@ public class MapManager {
     
     public HashMap<String, BufferedImage> getSprites() {
         return spriteList;
+    }
+    
+    public BufferedImage getCursor() {
+        return cursor;
     }
     
 }

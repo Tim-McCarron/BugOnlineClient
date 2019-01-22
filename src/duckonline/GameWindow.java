@@ -6,12 +6,14 @@ import Client.Client;
 import Unit.*;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.PointerInfo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import javax.swing.JPanel;
+import java.awt.Point;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -35,12 +37,15 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     private final int LEFT = 65;
     private final int DOWN = 83;
     private final int RIGHT = 68;
+    private double mouseX;
+    private double mouseY;
     
+    private BufferedImage crosshair;
     private BufferedImage background;
-    private HashMap<String, Unit> unitList = new HashMap<String, Unit>();
+    private HashMap<String, Unit> unitList = new HashMap();
     private HashMap<String, BufferedImage> sprites = new HashMap();
 //    private HashMap<String, Player> players = new HashMap<String, Player>();
-    private Graphics2D g;
+    private Graphics g;
     private Client client;
     
     public void run() {
@@ -54,13 +59,14 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
         manager.load(MapManager.MAP1);
         background = manager.getCurrent();
         sprites = manager.getSprites();
+        crosshair = manager.getCursor();
 //        sprites.add(new Player(50, 50, "Player1", "../resources/duck-R.png", 1, true));
 	// game loop
         client = new Client();
         client.connect();
         Thread connection = new Thread(client);
         connection.start();
-        
+        g = getGraphics();
         if (client.connect()) {
             
             while (running) {
@@ -69,9 +75,13 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
                 if (client.isReady()) {
                     unitList = client.getUnitList();
                 }
-                                
+                
+                PointerInfo a = MouseInfo.getPointerInfo();
+                Point mousePoint = a.getLocation();
+                mouseX = mousePoint.getX();
+                mouseY = mousePoint.getY();
                 drawToScreen();
-                draw();
+//                draw();
 
                 // end tick code
                 elapsed = System.nanoTime() - start;
@@ -92,35 +102,29 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
         setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
         setFocusable(true);
         requestFocus();
-        
     }
 
-    public void init() {
-//        image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-//	g = (Graphics2D) image.getGraphics();
-		
+    public void init() {		
 	running = true;
 //        addKeyListener(this);
     }
     
+    public void paintComponent(Graphics g) {
+       super.paintComponent(g);
+        g.drawImage(background, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
+        unitList.forEach((k, v) -> {
+            g.drawImage(sprites.get("player"), v.getX(), v.getY(), 100, 100, null);
+        });
+        g.drawImage(crosshair, (int) mouseX, (int) mouseY, 19, 19, null);
+       repaint();
+    }
+    
     private void drawToScreen() {
-	Graphics g2 = getGraphics();
-	g2.drawImage(background, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
-	g2.dispose();
+        paintComponent(g);
     }
     
     private void draw() {
         
-        Graphics g2 = background.getGraphics();
-      
-        unitList.forEach((k,v) -> {
-            g2.drawImage(sprites.get("player"), v.getX(), v.getY(), 100, 100, null);
-        });
-//        for (Object value : sprites.values()) {
-//            System.out.println(value.toString());
-//        }
-        g2.dispose();
-    
     }
     
     private void update() {
