@@ -14,6 +14,8 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import javax.swing.JPanel;
 import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -25,7 +27,7 @@ import java.awt.Point;
  *
  * @author abe
  */
-public class GameWindow extends JPanel implements Runnable, KeyListener {
+public class GameWindow extends JPanel implements Runnable, KeyListener, MouseMotionListener {
     public static final int WIDTH = 320;
     public static final int HEIGHT = 240;
     public static final int SCALE = 2;
@@ -55,31 +57,26 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
 	long start;
 	long elapsed;
 	long wait;
+        // load map and sprites
 	MapManager manager = new MapManager();
         manager.load(MapManager.MAP1);
         background = manager.getCurrent();
         sprites = manager.getSprites();
         crosshair = manager.getCursor();
-//        sprites.add(new Player(50, 50, "Player1", "../resources/duck-R.png", 1, true));
-	// game loop
+        // connect to server
         client = new Client();
         client.connect();
         Thread connection = new Thread(client);
         connection.start();
         g = getGraphics();
         if (client.connect()) {
-            
+            // game loop
             while (running) {
                 start = System.nanoTime();
                 // put tick code in here
                 if (client.isReady()) {
                     unitList = client.getUnitList();
                 }
-                
-                PointerInfo a = MouseInfo.getPointerInfo();
-                Point mousePoint = a.getLocation();
-                mouseX = mousePoint.getX();
-                mouseY = mousePoint.getY();
                 drawToScreen();
 //                draw();
 
@@ -102,11 +99,11 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
         setPreferredSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
         setFocusable(true);
         requestFocus();
+        addMouseMotionListener(this);
     }
 
     public void init() {		
 	running = true;
-//        addKeyListener(this);
     }
     
     public void paintComponent(Graphics g) {
@@ -145,6 +142,13 @@ public class GameWindow extends JPanel implements Runnable, KeyListener {
     public void keyTyped(KeyEvent e) {   
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    public void mouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+    
+    public void mouseDragged(MouseEvent e) {}
 
     public void keyPressed(KeyEvent e) {
         
