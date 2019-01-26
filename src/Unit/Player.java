@@ -13,7 +13,7 @@ public class Player extends Unit {
     
     private boolean me;
     
-    public Player(int id, int x, int y, String name, String sprite, boolean me) {
+    public Player(String id, int x, int y, String name, String sprite, boolean me) {
         super(x, y, name, sprite, id);
         this.me = me;
     }

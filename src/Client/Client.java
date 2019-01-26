@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import Util.*;
+import java.util.Random;
 /**
  *
  * @author Able
@@ -23,6 +24,7 @@ public class Client implements Runnable {
 //    private static HashMap<String, Player> list = new HashMap();
     private static Player me;
     private static int port = 9999;
+    private String clientId;
     String serverName = "127.0.0.1";
     private Socket sock;
     private OutputStream outToServer;
@@ -31,6 +33,7 @@ public class Client implements Runnable {
     private InputStream inFromServer;
     private DataInputStream in;
     private HashMap<String, Unit> list = new HashMap();
+    private String outboundPayload = "";
     
     private void assignPayload(String payload) {
         Unit[] load = Util.parsePayload(payload);
@@ -41,17 +44,18 @@ public class Client implements Runnable {
     
     public void run() {
         try {
+            out = new DataOutputStream(sock.getOutputStream());
+            inFromServer = sock.getInputStream();
+            in = new DataInputStream(inFromServer);
+            clientId = getRandomHexString(6);
+            out.writeUTF(clientId);
             while (connected) {
-                out = new DataOutputStream(sock.getOutputStream());
-                // mod with your own payload below
-                out.writeUTF("put your json here....");
-                inFromServer = sock.getInputStream();
-                in = new DataInputStream(inFromServer);
+                out.writeUTF(outboundPayload);
                 assignPayload(in.readUTF());
-//                System.out.println(in.readUTF());
             }
         } catch (Exception e) {
             e.printStackTrace();
+            connected = false;
         }
     }
     
@@ -63,11 +67,20 @@ public class Client implements Runnable {
         return !list.isEmpty();
     }
     
+    public void setPayload(QueuedCommand command) {
+        outboundPayload = command.getCommandString();
+    }
+    
+    public boolean isConnected() {
+        return connected;
+    }
+    
     public boolean connect() {
         try {
+            System.out.println("connecting");
             sock = new Socket(serverName, port);
-            outToServer = sock.getOutputStream();
-            out = new DataOutputStream(outToServer);
+//            outToServer = sock.getOutputStream();
+//            out = new DataOutputStream(outToServer);
             connected = true;
             return true;
         } catch (Exception e) {
@@ -92,6 +105,15 @@ public class Client implements Runnable {
     
     public Player getMe() {
         return me;
+    }
+    
+    private static String getRandomHexString(int numchars){
+        Random r = new Random();
+        StringBuffer sb = new StringBuffer();
+        while (sb.length() < numchars){
+            sb.append(Integer.toHexString(r.nextInt()));
+        }
+        return sb.toString().substring(0, numchars);
     }
     
 }

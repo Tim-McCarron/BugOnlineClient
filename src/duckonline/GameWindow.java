@@ -4,6 +4,7 @@ package duckonline;
 import MapManager.MapManager;
 import Client.Client;
 import Unit.*;
+import Util.QueuedCommand;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
@@ -49,6 +50,13 @@ public class GameWindow extends JPanel implements Runnable, KeyListener, MouseMo
 //    private HashMap<String, Player> players = new HashMap<String, Player>();
     private Graphics g;
     private Client client;
+    private QueuedCommand input = new QueuedCommand();
+    private boolean upActive = false;
+    private boolean downActive = false;
+    private boolean leftActive = false;
+    private boolean rightActive = false;
+    private double moveSpeed = 10;
+    
     
     public void run() {
         
@@ -69,10 +77,13 @@ public class GameWindow extends JPanel implements Runnable, KeyListener, MouseMo
         Thread connection = new Thread(client);
         connection.start();
         g = getGraphics();
-        if (client.connect()) {
+        if (client.isConnected()) {
             // game loop
             while (running) {
                 start = System.nanoTime();
+                checkInputs();
+                client.setPayload(input);
+                input.clear();
                 // put tick code in here
                 if (client.isReady()) {
                     unitList = client.getUnitList();
@@ -149,27 +160,59 @@ public class GameWindow extends JPanel implements Runnable, KeyListener, MouseMo
     }
     
     public void mouseDragged(MouseEvent e) {}
+    
+    public void checkInputs() {
+        if (upActive && leftActive) {
+            input.sendUpLeft(moveSpeed);
+        } else if (upActive && rightActive) {
+            input.sendUpRight(moveSpeed);
+        } else if (downActive && leftActive) {
+            input.sendDownLeft(moveSpeed);
+        } else if (downActive && rightActive) {
+            input.sendDownRight(moveSpeed);
+        } else if (upActive) {
+            input.sendUp(moveSpeed);
+        } else if (downActive) {
+            input.sendDown(moveSpeed);
+        } else if (leftActive) {
+            input.sendLeft(moveSpeed);
+        } else if (rightActive) {
+            input.sendRight(moveSpeed);
+        }
+    }
 
     public void keyPressed(KeyEvent e) {
-        
         if (e.getKeyCode() == UP) {
-            System.out.println("UP");
+            upActive = true;
+            downActive = false;
         }
         if (e.getKeyCode() == LEFT) {
-            System.out.println("LEFT");
+            leftActive = true;
+            rightActive = false;
         }
         if (e.getKeyCode() == DOWN) {
-            System.out.println("DOWN");
+            downActive = true;
+            upActive = false;
         }
         if (e.getKeyCode() == RIGHT) {
-            System.out.println("RIGHT");
+            rightActive = true;
+            leftActive = false;
         }
-        
-        
     }
 
     public void keyReleased(KeyEvent e) {
-//        System.out.println("shit");
+        if (e.getKeyCode() == UP) {
+            upActive = false;
+        }
+        if (e.getKeyCode() == LEFT) {
+            leftActive = false;
+        }
+        if (e.getKeyCode() == DOWN) {
+            downActive = false;
+        }
+        if (e.getKeyCode() == RIGHT) {
+            rightActive = false;
+        }
     }
     
 }

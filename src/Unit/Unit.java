@@ -15,10 +15,10 @@ public class Unit {
     private int y;
     private String name;
     private String spritePath;
-    private int id;
+    private String id;
 //    private final static boolean ABSOLUTE = true;
     
-    public Unit(int x, int y, String name, String spritePath, int id) {
+    public Unit(int x, int y, String name, String spritePath, String id) {
         this.x = x;
         this.y = y;
         this.name = name;
@@ -43,7 +43,7 @@ public class Unit {
         return spritePath;
     }
     
-    public int getId() {
+    public String getId() {
         return id;
     }
     
@@ -63,7 +63,7 @@ public class Unit {
         this.spritePath = spritePath;
     }
     
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
     
