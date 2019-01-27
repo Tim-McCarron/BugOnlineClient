@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Unit;
 
 /**
@@ -11,27 +6,28 @@ package Unit;
  */
 // absolute unit
 public class Unit {
-    private int x;
-    private int y;
+    private double x;
+    private double y;
     private String name;
     private String spritePath;
     private String id;
+    private double speed;
 //    private final static boolean ABSOLUTE = true;
-    
-    public Unit(int x, int y, String name, String spritePath, String id) {
+    public Unit() {}
+    public Unit(double x, double y, String name, String spritePath, String id, double speed) {
         this.x = x;
         this.y = y;
         this.name = name;
         this.spritePath = spritePath;
-        
+        this.speed = speed;
         this.id = id;
     }
     
-    public int getX() {
+    public double getX() {
         return x;
     }
     
-    public int getY() {
+    public double getY() {
         return y;
     }
     
@@ -47,11 +43,15 @@ public class Unit {
         return id;
     }
     
-    public void setX(int x) {
+    public double getSpeed() {
+        return speed;
+    }
+    
+    public void setX(double x) {
         this.x = x;
     }
     
-    public void setY(int y) {
+    public void setY(double y) {
         this.y = y;
     }
     
@@ -67,5 +67,8 @@ public class Unit {
         this.id = id;
     }
     
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
     
 }

@@ -121,7 +121,7 @@ public class GameWindow extends JPanel implements Runnable, KeyListener, MouseMo
        super.paintComponent(g);
         g.drawImage(background, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
         unitList.forEach((k, v) -> {
-            g.drawImage(sprites.get("player"), v.getX(), v.getY(), 100, 100, null);
+            g.drawImage(sprites.get("player"), (int) Math.round(v.getX()), (int) Math.round(v.getY()), 100, 100, null);
         });
         g.drawImage(crosshair, (int) mouseX, (int) mouseY, 19, 19, null);
        repaint();

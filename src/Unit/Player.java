@@ -12,9 +12,11 @@ package Unit;
 public class Player extends Unit {
     
     private boolean me;
-    
-    public Player(String id, int x, int y, String name, String sprite, boolean me) {
-        super(x, y, name, sprite, id);
+    public Player() {
+        super();
+    }
+    public Player(String id, double x, double y, String name, String sprite, double speed, boolean me) {
+        super(x, y, name, sprite, id, speed);
         this.me = me;
     }
     
