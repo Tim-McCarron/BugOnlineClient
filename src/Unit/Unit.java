@@ -8,20 +8,32 @@ package Unit;
 public class Unit {
     private double x;
     private double y;
+    private double z;
     private String name;
     private String spritePath;
     private String id;
     private double speed;
+    private boolean me;
 //    private final static boolean ABSOLUTE = true;
     public Unit() {}
-    public Unit(double x, double y, String name, String spritePath, String id, double speed) {
+    public Unit(double x, double y, double Z, String name, String spritePath, String id, double speed) {
         this.x = x;
         this.y = y;
+        this.z = z;
         this.name = name;
         this.spritePath = spritePath;
         this.speed = speed;
         this.id = id;
     }
+            
+    public void setIsMe(boolean isMe) {
+        me = isMe;
+    }
+    
+    public boolean getIsMe() {
+        return me;
+    }
+    
     
     public double getX() {
         return x;
@@ -29,6 +41,10 @@ public class Unit {
     
     public double getY() {
         return y;
+    }
+    
+    public double getZ() {
+        return z;
     }
     
     public String getName() {
@@ -53,6 +69,10 @@ public class Unit {
     
     public void setY(double y) {
         this.y = y;
+    }
+    
+    public void setZ(double z) {
+        this.z = z;
     }
     
     public void setName(String name) {

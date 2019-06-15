@@ -23,14 +23,8 @@ public class DuckOnline {
     public static void main(String[] args) {
         // TODO code application logic here
         BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
-        JFrame window = new JFrame("Duck Online");
-        window.setContentPane(new GameWindow());
-        window.getContentPane().setCursor(blankCursor);
-	window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setResizable(false);
-	window.pack();
-	window.setVisible(true);
+        Thread gameWindow = new Thread(new GameWindow());
+        gameWindow.start();
     }
     
 }

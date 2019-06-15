@@ -54,7 +54,11 @@ public class Client implements Runnable {
                 assignPayload(in.readUTF());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (e.getMessage() != "Socket closed") {
+                System.out.println("Client closed connection");
+            } else {
+                e.printStackTrace();
+            }
             connected = false;
         }
     }
@@ -67,8 +71,8 @@ public class Client implements Runnable {
         return !list.isEmpty();
     }
     
-    public void setPayload(QueuedCommand command) {
-        outboundPayload = command.getCommandString();
+    public void setPayload() {
+        outboundPayload = QueuedCommand.getCommandString();
     }
     
     public boolean isConnected() {
@@ -116,4 +120,7 @@ public class Client implements Runnable {
         return sb.toString().substring(0, numchars);
     }
     
+    public String getClientId() {
+        return clientId;
+    }
 }

@@ -19,20 +19,21 @@ public class Util {
         json.clear();
         String[] units = pl.split("/");
         Player[] players = new Player[units.length];
-        System.out.println(pl);
         for (int i = 0; i < units.length; i++) {
             String[] unit = units[i].split(":");
             try {
-                // public Player(int id, int x, int y, String name, String sprite, boolean me) {
-                // 213231:duck master 9:100:150
+                // public Player(String id, double x, double y, double z, String name, String sprite, boolean me) {
+                // 213231:duck master 9:100:150:10
 //                System.out.println(unit[0] + " 27");
 //                System.out.println(unit[2] + " 28");
 //                System.out.println(unit[3] + " 29");
 //                System.out.println(unit[1] + " 30");
 // public Player(String id, double x, double y, String name, String sprite, double speed, boolean me) {
-                Player player = new Player(unit[0], Double.parseDouble(unit[2]), Double.parseDouble(unit[3]), unit[1], "../resources/duck-R.png", 10, false);
+//                Player player = new Player(unit[0], Double.parseDouble(unit[2]), Double.parseDouble(unit[3]), unit[1], "../resources/duck-R.png", 10, false);
+                Player player = new Player(unit[0], Double.parseDouble(unit[2]), Double.parseDouble(unit[3]), Double.parseDouble(unit[4]), unit[1], "../resources/duck-R.png", 10, false);
                 players[i] = player;
             } catch (Exception e) {
+                System.out.println("error PL " + pl);
                 e.printStackTrace();
             }
             
