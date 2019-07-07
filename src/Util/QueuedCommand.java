@@ -15,11 +15,13 @@ public class QueuedCommand {
     private static double x;
     private static double y;
     private static double z;
+    private static float direction;
     
     public QueuedCommand() {
         x = 0;
         y = 0;
         z = 0;
+        direction = 0;
     }
     
     public static void clear() {
@@ -29,37 +31,36 @@ public class QueuedCommand {
     }
     
     public static String getCommandString() {
-        return x + ":" + y + ":" + z;
+        return x + ":" + y + ":" + z + ":" + direction;
     }
     
-    public static void setCommandString(double setX, double setY, double setZ) {
+    public static void setCommandString(double setX, double setY, double setZ, float setD) {
         x = setX;
         y = setY;
         z = setZ;
+        direction = setD;
     }
     
-    public static void sendUp(double speed) {
-        y += speed;
+    public static void sendY(double speed) {
+        double toAdd = speed;
+        toAdd = Double.parseDouble(String.format("%.2f", y + toAdd));
+        y = toAdd;
     }
     
-    public static void sendDown(double speed) {
-        y -= speed;
+    public static void sendX(double speed) {
+        double toAdd = speed;
+        toAdd = Double.parseDouble(String.format("%.2f", x + toAdd));
+        x = toAdd;
     }
     
-    public static void sendLeft(double speed) {
-        x -= speed;
+    public static void sendZ(double speed) {
+        double toAdd = speed;
+        toAdd = Double.parseDouble(String.format("%.2f", z + toAdd));
+        z = toAdd;
     }
     
-    public static void sendRight(double speed) {
-        x += speed;
-    }
-    
-    public static void sendForward(double speed) {
-        z += speed;
-    }
-    
-    public static void sendBackward(double speed) {
-        z -= speed;
+    public static void sendDir(float d) {
+        direction = d;
     }
     
     public static void sendUpLeft(double speed) {

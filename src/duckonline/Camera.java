@@ -40,10 +40,9 @@ public class Camera {
         translateZ = 2.0f;
     }
     
-    public Matrix4f getMVP() {
-               
-        Vector3f camera =  new Vector3f(translateX, translateY, translateZ);
-        Vector3f lookHere = new Vector3f(translateX, translateY, translateZ - 2.0f);
+    public Matrix4f getMVP(float rotation) {
+        Vector3f camera =  new Vector3f(0, 1, -3.0f);
+        Vector3f lookHere = new Vector3f(0, 0, 0);
         Matrix4f view = new Matrix4f().lookAt(
             camera,
             lookHere,
@@ -52,11 +51,11 @@ public class Camera {
         );
         
         Quaternionf quat = new Quaternionf();
-        quat.rotateY((float) Math.toRadians(yaw));
-        view.rotateAround(quat, translateX, translateY, translateZ - 2);
+        quat.rotateY((float) Math.toRadians(rotation));
+        view.rotateAround(quat, 0, 0, 0);
 
         model = new Matrix4f().identity();
-        proj = new Matrix4f().perspective(fov, width / height, 0.1f, 10.0f);
+        proj = new Matrix4f().perspective(fov, width / height, 0.1f, 90.0f);
         Matrix4f mvp = proj.mul(view).mul(model);
         
         return mvp;
@@ -67,13 +66,17 @@ public class Camera {
         translateX += tx;
         float tz = (float) (.1 * (float) Math.cos(Math.toRadians(yaw + 90)));
         translateZ -= tz;
-        QueuedCommand.sendUp(1);
+        QueuedCommand.sendX(tx);
+        QueuedCommand.sendZ(tz * -1);
     }
     
     public void strafeLeft() {
-        translateX += .1 * (float) Math.sin(Math.toRadians(yaw - 90));
-        translateZ -= .1 *
-                (float) Math.cos(Math.toRadians(yaw - 90));
+        float tx = (float) (.1 * (float) Math.sin(Math.toRadians(yaw - 90)));
+        translateX += tx;
+        float tz = (float) (.1 * (float) Math.cos(Math.toRadians(yaw - 90)));
+        translateZ -= tz;
+        QueuedCommand.sendX(tx);
+        QueuedCommand.sendZ(tz * -1);
     }
     
     public void translateX(float x) {
@@ -81,21 +84,33 @@ public class Camera {
     }
     
     public void forward() {
-        translateX += .1 * (float) Math.sin(Math.toRadians(yaw));
-        translateZ -= .1 * (float) Math.cos(Math.toRadians(yaw));
+        float tx = (float) (.1 * (float) Math.sin(Math.toRadians(yaw)));
+        translateX += tx;
+        float tz = (float) (.1 * (float) Math.cos(Math.toRadians(yaw)));
+        translateZ -= tz;
+        QueuedCommand.sendX(tx);
+        QueuedCommand.sendZ(tz * -1);
     }
     
     public void backward() {
-        translateX -= .1 * (float) Math.sin(Math.toRadians(yaw));
-        translateZ += .1 * (float) Math.cos(Math.toRadians(yaw));
+        float tx = (float) (.1 * (float) Math.sin(Math.toRadians(yaw)));
+        translateX -= tx;
+        float tz = (float) (.1 * (float) Math.cos(Math.toRadians(yaw)));
+        translateZ += tz;
+        QueuedCommand.sendX(tx * -1);
+        QueuedCommand.sendZ(tz);
     }
     
     public void up() {
-        translateY += .1;
+        float ty = 0.1f;
+        translateY += ty;
+        QueuedCommand.sendY(ty);
     }
     
     public void down() {
-        translateY -= .1;
+        float ty = -0.1f;
+        translateY += ty;
+        QueuedCommand.sendY(ty);
     }
     
     public void zoomIn() {
@@ -108,8 +123,22 @@ public class Camera {
         System.out.println(fov);
     }
     
-    public void rotateHorizontal(double angle) {
-        yaw += angle;
+    public void rotateHorizontal(float angle) {
+        float newYaw = yaw + angle;
+        if (newYaw < 0) {
+            yaw = newYaw + 360;
+        } else if (newYaw > 360) {
+            yaw = newYaw - 360;
+        } else if (newYaw == 360) {
+            yaw = 0;
+        } else {
+//            System.out.println("WHY THE FUCK AM I HERE " + newYaw);
+            yaw += angle;
+        }
+        if (yaw >= 360) {
+            System.out.println("wtf ... " + newYaw + "--->" + yaw);
+        }
+        QueuedCommand.sendDir(yaw);
     }
     
     public String getLocation() {

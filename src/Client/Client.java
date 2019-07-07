@@ -40,8 +40,9 @@ public class Client implements Runnable {
         for (int i = 0; i < load.length; i++) {
             list.put(String.valueOf(load[i].getId()), load[i]);
         }
+        
     }
-    
+
     public void run() {
         try {
             out = new DataOutputStream(sock.getOutputStream());

@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -130,6 +131,9 @@ public class GameWindow implements Runnable {
         Thread connection = new Thread(client);
         connection.start();
         Texture tex = new Texture("./src/resources/duck-R.png");
+        
+        float myX = 0, myY = 0, myZ = 0, direction = 0;
+        
         if (client.isConnected()) {
             Camera camera = new Camera(width, height);
             // game loop
@@ -159,23 +163,19 @@ public class GameWindow implements Runnable {
                 }
 
                 if (isKeyDown(GLFW_KEY_W)) {
-                    QueuedCommand.sendForward(1);
-//                    camera.forward();
+                    camera.forward();
                 }
 
                 if (isKeyDown(GLFW_KEY_S)) {
-                    QueuedCommand.sendBackward(1);
-//                    camera.backward();
+                    camera.backward();
                 }
 
                 if (isKeyDown(GLFW_KEY_SPACE)) {
-                    QueuedCommand.sendUp(1);
-//                    camera.up();
+                    camera.up();
                 }
 
                 if (isKeyDown(GLFW_KEY_LEFT_SHIFT)) {
-                    QueuedCommand.sendDown(1);
-//                    camera.down();
+                    camera.down();
                 }
                 GLFW.glfwPollEvents();
                 if (client.isReady()) {
@@ -194,20 +194,32 @@ public class GameWindow implements Runnable {
                     ArrayList<Unit> toDraw = new ArrayList();
                     for (Unit thisUnit : unitList.values()) {
                         if (thisUnit.getId().equals(client.getClientId())) {
+                            myX = (float) thisUnit.getX();
+                            myY = (float) thisUnit.getY();
+                            myZ = (float) thisUnit.getZ();
+                            direction = thisUnit.getDir();
                             thisUnit.setIsMe(true);
                         } else {
                             thisUnit.setIsMe(false);
                         }
                         toDraw.add(thisUnit);
                     }
-                    
-                    toDraw.forEach((thisUnit) -> {
-                        Matrix4f mvp = camera.getMVP();
-                        Vector3f unitTranslate = new Vector3f((float) thisUnit.getX(), (float) thisUnit.getY(), (float) thisUnit.getZ());
-                        shader.setUniform("mvp", mvp.translate(unitTranslate));
+//                    System.out.println(direction);
+                    for (int i = 0; i < toDraw.size(); i++) {
+                        if (toDraw.get(i).getIsMe()) {
+                            Matrix4f mvp = camera.getMVP(0);
+                            shader.setUniform("mvp", mvp);
+                        } else {
+//                            System.out.println(direction + toDraw.get(i).getDir());
+                            Matrix4f mvp = camera.getMVP(direction);
+                            // (float) toDraw.get(i).getX(), (float) toDraw.get(i).getY(), (float) toDraw.get(i).getZ()
+                            Vector3f unitTranslate = new Vector3f(myX - (float) toDraw.get(i).getX(), (float) toDraw.get(i).getY() - myY, myZ - (float) toDraw.get(i).getZ());
+                            shader.setUniform("mvp", mvp.translate(unitTranslate));
+                        }
                         // 0 is for vertex and 1 is for textures
                         glDrawElements(GL_TRIANGLES, Player.indices.length, GL_UNSIGNED_INT, 0);
-                    }); 
+                    }
+
                     
                     // unbind buffers
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -216,6 +228,8 @@ public class GameWindow implements Runnable {
                     glDisableVertexAttribArray(glGetAttribLocation(1, "textures"));
                 }
                 GLFW.glfwSwapBuffers(window);
+                client.setPayload();
+                QueuedCommand.clear();
                 // end tick code
             }
             client.close();

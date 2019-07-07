@@ -9,6 +9,7 @@ public class Unit {
     private double x;
     private double y;
     private double z;
+    private float direction;
     private String name;
     private String spritePath;
     private String id;
@@ -16,10 +17,11 @@ public class Unit {
     private boolean me;
 //    private final static boolean ABSOLUTE = true;
     public Unit() {}
-    public Unit(double x, double y, double Z, String name, String spritePath, String id, double speed) {
+    public Unit(double x, double y, double z, float dir, String name, String spritePath, String id, double speed) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.direction = dir;
         this.name = name;
         this.spritePath = spritePath;
         this.speed = speed;
@@ -45,6 +47,10 @@ public class Unit {
     
     public double getZ() {
         return z;
+    }
+    
+    public float getDir() {
+        return direction;
     }
     
     public String getName() {
@@ -89,6 +95,10 @@ public class Unit {
     
     public void setSpeed(double speed) {
         this.speed = speed;
+    }
+    
+    public void setDir(float d) {
+        this.direction = d;
     }
     
 }
