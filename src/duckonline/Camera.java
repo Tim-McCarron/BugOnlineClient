@@ -40,7 +40,7 @@ public class Camera {
         translateZ = 2.0f;
     }
     
-    public Matrix4f getMVP(float rotation) {
+    public Matrix4f getMVP(float rotation, float objectRot, float x, float y, float z) {
         Vector3f camera =  new Vector3f(0, 1, -3.0f);
         Vector3f lookHere = new Vector3f(0, 0, 0);
         Matrix4f view = new Matrix4f().lookAt(
@@ -50,17 +50,25 @@ public class Camera {
             new Vector3f(0.0f, 1.0f, 0.0f)
         );
         
+        model = new Matrix4f().identity();
+        Quaternionf objQuat = new Quaternionf();
+        model.translate(new Vector3f(x, y, z));
+        objQuat.rotateY((float) Math.toRadians(objectRot));
+        model.rotate(objQuat);
+        
         Quaternionf quat = new Quaternionf();
         quat.rotateY((float) Math.toRadians(rotation));
         view.rotateAround(quat, 0, 0, 0);
-
-        model = new Matrix4f().identity();
+        
+        
+        
         proj = new Matrix4f().perspective(fov, width / height, 0.1f, 90.0f);
         Matrix4f mvp = proj.mul(view).mul(model);
         
+//        mvp.rotateAround(quat, 0, 0, 0);
         return mvp;
     }
-    
+
     public void strafeRight() {
         float tx = (float) (.1 * (float) Math.sin(Math.toRadians(yaw + 90)));
         translateX += tx;
@@ -132,11 +140,7 @@ public class Camera {
         } else if (newYaw == 360) {
             yaw = 0;
         } else {
-//            System.out.println("WHY THE FUCK AM I HERE " + newYaw);
             yaw += angle;
-        }
-        if (yaw >= 360) {
-            System.out.println("wtf ... " + newYaw + "--->" + yaw);
         }
         QueuedCommand.sendDir(yaw);
     }

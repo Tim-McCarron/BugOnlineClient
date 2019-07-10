@@ -207,14 +207,13 @@ public class GameWindow implements Runnable {
 //                    System.out.println(direction);
                     for (int i = 0; i < toDraw.size(); i++) {
                         if (toDraw.get(i).getIsMe()) {
-                            Matrix4f mvp = camera.getMVP(0);
+                            Matrix4f mvp = camera.getMVP(0, 0, 0, 0, 0);
                             shader.setUniform("mvp", mvp);
                         } else {
 //                            System.out.println(direction + toDraw.get(i).getDir());
-                            Matrix4f mvp = camera.getMVP(direction);
-                            // (float) toDraw.get(i).getX(), (float) toDraw.get(i).getY(), (float) toDraw.get(i).getZ()
-                            Vector3f unitTranslate = new Vector3f(myX - (float) toDraw.get(i).getX(), (float) toDraw.get(i).getY() - myY, myZ - (float) toDraw.get(i).getZ());
-                            shader.setUniform("mvp", mvp.translate(unitTranslate));
+                            Matrix4f mvp = camera.getMVP(direction, toDraw.get(i).getDir(), myX - (float) toDraw.get(i).getX(), (float) toDraw.get(i).getY() - myY, myZ - (float) toDraw.get(i).getZ());
+//                            Vector3f unitTranslate = new Vector3f(myX - (float) toDraw.get(i).getX(), (float) toDraw.get(i).getY() - myY, myZ - (float) toDraw.get(i).getZ());
+                            shader.setUniform("mvp", mvp);
                         }
                         // 0 is for vertex and 1 is for textures
                         glDrawElements(GL_TRIANGLES, Player.indices.length, GL_UNSIGNED_INT, 0);
