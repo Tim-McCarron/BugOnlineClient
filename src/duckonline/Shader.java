@@ -46,8 +46,8 @@ public class Shader {
         glAttachShader(program, vs);
         glAttachShader(program, fs);
         
-        glBindAttribLocation(program, 0, "vertices");
-        glBindAttribLocation(program, 1, "textures");
+//        glBindAttribLocation(program, 0, "ant");
+//        glBindAttribLocation(program, 1, "ant_tex");
         
         glLinkProgram(program);
         if (glGetProgrami(program, GL_LINK_STATUS) != 1) {

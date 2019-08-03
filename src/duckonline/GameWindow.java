@@ -12,8 +12,6 @@ import java.awt.event.MouseEvent;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
@@ -121,6 +119,7 @@ public class GameWindow implements Runnable {
         // load map and sprites
 	MapManager manager = new MapManager();
         manager.load(MapManager.MAP1);
+        
         background = manager.getCurrent();
         sprites = manager.getSprites();
         crosshair = manager.getCursor();
@@ -130,11 +129,17 @@ public class GameWindow implements Runnable {
         client.setPayload();
         Thread connection = new Thread(client);
         connection.start();
-        Texture tex = new Texture("./src/resources/duck-R.png");
+        
+        Texture ground = new Texture("./src/resources/grass.jpg");
+        Texture tex = new Texture("./src/resources/bren.png");
         
         float myX = 0, myY = 0, myZ = 0, direction = 0;
         
         if (client.isConnected()) {
+            Player.load();
+            MapManager.load();
+            Render.bufferPlayer();
+            shader.bind();
             Camera camera = new Camera(width, height);
             // game loop
             while (!GLFW.glfwWindowShouldClose(window)) {
@@ -180,17 +185,34 @@ public class GameWindow implements Runnable {
                 GLFW.glfwPollEvents();
                 if (client.isReady()) {
                     unitList = client.getUnitList();
-                    Render.bufferPlayer();
-                    tex.bind(0);
-                    glEnableVertexAttribArray(glGetAttribLocation(1, "vertices"));
-                    glEnableVertexAttribArray(glGetAttribLocation(1, "textures"));
-                    glBindBuffer(GL_ARRAY_BUFFER, Render.v_id);
+                    
+                    
+                    ground.bind(0);
+
+                    glEnableVertexAttribArray(glGetAttribLocation(1, "ant"));
+                    glEnableVertexAttribArray(glGetAttribLocation(1, "ant_tex"));
+
+                    glBindBuffer(GL_ARRAY_BUFFER, Render.v_id_world);
                     glVertexAttribPointer(0, 3, GL_FLOAT, true, 0, 0);
-                    glBindBuffer(GL_ARRAY_BUFFER, Render.t_id);
+                    glBindBuffer(GL_ARRAY_BUFFER, Render.t_id_world);
                     glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Render.i_id);
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Render.i_id_world);
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                    shader.bind();
+                    Matrix4f worldMVP = camera.getMVP(direction, 0, myX, (float) 0 - myY, myZ);
+                    shader.setUniform("mvp", worldMVP);
+                    glDrawElements(GL_TRIANGLES, MapManager.indices.length, GL_UNSIGNED_INT, 0);
+
+
+                    
+                    tex.bind(0);
+                    glBindBuffer(GL_ARRAY_BUFFER, Render.v_id_player);
+                    
+                    glVertexAttribPointer(0, 3, GL_FLOAT, true, 0, 0);
+                    glBindBuffer(GL_ARRAY_BUFFER, Render.t_id_player);
+                    glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, Render.i_id_player);
+                    
+                    
                     ArrayList<Unit> toDraw = new ArrayList();
                     for (Unit thisUnit : unitList.values()) {
                         if (thisUnit.getId().equals(client.getClientId())) {
@@ -204,7 +226,7 @@ public class GameWindow implements Runnable {
                         }
                         toDraw.add(thisUnit);
                     }
-//                    System.out.println(direction);
+//                    System.out.println(toDraw.size());
                     for (int i = 0; i < toDraw.size(); i++) {
                         if (toDraw.get(i).getIsMe()) {
                             Matrix4f mvp = camera.getMVP(0, 0, 0, 0, 0);
@@ -218,13 +240,14 @@ public class GameWindow implements Runnable {
                         // 0 is for vertex and 1 is for textures
                         glDrawElements(GL_TRIANGLES, Player.indices.length, GL_UNSIGNED_INT, 0);
                     }
-
+                    
+//                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                     
                     // unbind buffers
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
                     glBindBuffer(GL_ARRAY_BUFFER, 0);
-                    glDisableVertexAttribArray(glGetAttribLocation(1, "vertices"));
-                    glDisableVertexAttribArray(glGetAttribLocation(1, "textures"));
+                    glDisableVertexAttribArray(glGetAttribLocation(1, "ant"));
+                    glDisableVertexAttribArray(glGetAttribLocation(1, "ant_tex"));
                 }
                 GLFW.glfwSwapBuffers(window);
                 client.setPayload();

@@ -10,6 +10,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Quaternionfc;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 
 /**
@@ -40,8 +41,8 @@ public class Camera {
         translateZ = 2.0f;
     }
     
-    public Matrix4f getMVP(float rotation, float objectRot, float x, float y, float z) {
-        Vector3f camera =  new Vector3f(0, 1, -3.0f);
+    public Matrix4f getWorldMVP(float x, float y, float z) {
+        Vector3f camera =  new Vector3f(0, 2, -3.0f);
         Vector3f lookHere = new Vector3f(0, 0, 0);
         Matrix4f view = new Matrix4f().lookAt(
             camera,
@@ -51,9 +52,32 @@ public class Camera {
         );
         
         model = new Matrix4f().identity();
+//        model.transform(new Vector4f(90f, 0, 90f, 0));
+        model.translate(new Vector3f(x, 1-y, z));
+        
+        
+        
+        proj = new Matrix4f().perspective(fov, width / height, 0.4f, 50.0f);
+        Matrix4f mvp = proj.mul(view).mul(model);
+        
+        return mvp;
+    }
+    
+    public Matrix4f getMVP(float rotation, float objectRot, float x, float y, float z) {
+        Vector3f camera =  new Vector3f(0, 2, -3.0f);
+        Vector3f lookHere = new Vector3f(0, 0, 0);
+        Matrix4f view = new Matrix4f().lookAt(
+            camera,
+            lookHere,
+            // which axis is "up"
+            new Vector3f(0.0f, 1.0f, 0.0f)
+        );
+        
+        model = new Matrix4f().identity();
+        
         Quaternionf objQuat = new Quaternionf();
         model.translate(new Vector3f(x, y, z));
-        objQuat.rotateY((float) Math.toRadians(objectRot));
+        objQuat.rotateY( - (float) Math.toRadians(objectRot));
         model.rotate(objQuat);
         
         Quaternionf quat = new Quaternionf();
@@ -62,7 +86,7 @@ public class Camera {
         
         
         
-        proj = new Matrix4f().perspective(fov, width / height, 0.1f, 90.0f);
+        proj = new Matrix4f().perspective(fov, width / height, 0.1f, 50.0f);
         Matrix4f mvp = proj.mul(view).mul(model);
         
 //        mvp.rotateAround(quat, 0, 0, 0);
