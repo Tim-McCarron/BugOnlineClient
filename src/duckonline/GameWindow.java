@@ -5,7 +5,6 @@ import MapManager.MapManager;
 import Client.Client;
 import Unit.*;
 import Util.QueuedCommand;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.awt.event.MouseEvent;
@@ -14,18 +13,7 @@ import java.util.ArrayList;
 import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_E;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_Q;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
-import static org.lwjgl.glfw.GLFW.glfwGetKey;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose;
+import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL11.GL_ALPHA;
@@ -58,55 +46,42 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
  * @author abe
  */
 public class GameWindow implements Runnable {
-    public static final int WIDTH = 320;
-    public static final int HEIGHT = 240;
+//    public static final int WIDTH = 1200;
+//    public static final int HEIGHT = 1000;
     public static final int SCALE = 2;
-    private Thread thread;
-    private boolean running;
     private int FPS = 60;
-    private long targetTime = 1000 / FPS;
-    private final int UP = 87;
-    private final int LEFT = 65;
-    private final int DOWN = 83;
-    private final int RIGHT = 68;
+
     private double mouseX;
     private double mouseY;
     
     private BufferedImage crosshair;
-    private BufferedImage background;
     private HashMap<String, Unit> unitList = new HashMap();
     private HashMap<String, BufferedImage> sprites = new HashMap();
 //    private HashMap<String, Player> players = new HashMap<String, Player>();
-    private Graphics g;
     private Client client;
-    private boolean upActive = false;
-    private boolean downActive = false;
-    private boolean leftActive = false;
-    private boolean rightActive = false;
-    private double moveSpeed = 10;
     
     public static long window;
-    public static final int width = 800, height = 600;
-    private static boolean[] keys = new boolean[GLFW.GLFW_KEY_LAST];
-    private static boolean[] mouseButtons = new boolean[GLFW.GLFW_MOUSE_BUTTON_LAST];
+    public static final int width = 1400, height = 800;
+    private static boolean[] keys = new boolean[GLFW_KEY_LAST];
+    private static boolean[] mouseButtons = new boolean[GLFW_MOUSE_BUTTON_LAST];
     
     public void run() {
-        if  (!GLFW.glfwInit()) {
+        if  (!glfwInit()) {
             System.err.println("couldnt init nibba");
         }
         
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         
         // 0s for not making it fullscreen and not stretching between monitors
-        window = GLFW.glfwCreateWindow(width, height, "ducks", 0, 0);
+        window = glfwCreateWindow(width, height, "BugOnline", 0, 0);
         
         
         // set the mode to the gucci montior
-        GLFWVidMode videoMode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
+        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         // set window position on screen and show that shit
-        GLFW.glfwSetWindowPos(window, (videoMode.width() - width) / 2, (videoMode.height() - height) / 2);
-        GLFW.glfwShowWindow(window);
+        glfwSetWindowPos(window, (videoMode.width() - width) / 2, (videoMode.height() - height) / 2);
+        glfwShowWindow(window);
         
         glfwMakeContextCurrent(window);
         GL.createCapabilities();
@@ -117,12 +92,10 @@ public class GameWindow implements Runnable {
 	long elapsed;
 	long wait;
         // load map and sprites
-	MapManager manager = new MapManager();
-        manager.load(MapManager.MAP1);
+//	MapManager manager = new MapManager();
+//        manager.load(MapManager.MAP1);
         
-        background = manager.getCurrent();
-        sprites = manager.getSprites();
-        crosshair = manager.getCursor();
+        System.out.println(crosshair);
         // connect to server
         client = new Client();
         client.connect();
@@ -135,6 +108,9 @@ public class GameWindow implements Runnable {
         
         float myX = 0, myY = 0, myZ = 0, direction = 0;
         
+        float horizontalToRotate = 0;
+        float verticalToRotate = 0;
+        
         if (client.isConnected()) {
             Player.load();
             MapManager.load();
@@ -142,16 +118,38 @@ public class GameWindow implements Runnable {
             shader.bind();
             Camera camera = new Camera(width, height);
             // game loop
-            while (!GLFW.glfwWindowShouldClose(window)) {
+            mouseX = getMouseX();
+            mouseY = getMouseY();
+            
+            GLFW.glfwSetScrollCallback(window, (window, xoffset, yoffset) -> {
+                if (yoffset > 0) {
+                    camera.zoomIn();
+                } else if (yoffset < 0) {
+                    camera.zoomOut();
+                } 
+            });
+            
+            while (!glfwWindowShouldClose(window)) {
                 start = System.nanoTime();
                 
                 if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GL_TRUE) {
                     glfwSetWindowShouldClose(window, true);
                 }
                 
-                for (int i = 0; i < GLFW.GLFW_KEY_LAST; i++) keys[i] = isKeyDown(i);
-                for (int i = 0; i < GLFW.GLFW_MOUSE_BUTTON_LAST; i++) mouseButtons[i] = isMouseDown(i);
-
+                for (int i = 0; i < GLFW_KEY_LAST; i++) keys[i] = isKeyDown(i);
+                for (int i = 0; i < GLFW_MOUSE_BUTTON_LAST; i++) mouseButtons[i] = isMouseDown(i);
+                if (mouseButtons[1]) {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    float mouseDX = (float) ((getMouseX() - mouseX) * .2);
+                    horizontalToRotate += mouseDX;
+                    camera.rotateHorizontal(horizontalToRotate);
+                    mouseX = getMouseX();
+                    horizontalToRotate = 0;
+                    
+                } else {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    mouseX = getMouseX();
+                }
                 if (isKeyDown(GLFW_KEY_D)) {
                     camera.strafeRight();
                 }
@@ -162,7 +160,7 @@ public class GameWindow implements Runnable {
                 if (isKeyDown(GLFW_KEY_E)) {
                     camera.rotateHorizontal(-6);
                 }
-
+                
                 if (isKeyDown(GLFW_KEY_Q)) {
                     camera.rotateHorizontal(6);
                 }
@@ -182,10 +180,9 @@ public class GameWindow implements Runnable {
                 if (isKeyDown(GLFW_KEY_LEFT_SHIFT)) {
                     camera.down();
                 }
-                GLFW.glfwPollEvents();
+                glfwPollEvents();
                 if (client.isReady()) {
                     unitList = client.getUnitList();
-                    
                     
                     ground.bind(0);
 
@@ -201,8 +198,6 @@ public class GameWindow implements Runnable {
                     Matrix4f worldMVP = camera.getMVP(direction, 0, myX, (float) 0 - myY, myZ);
                     shader.setUniform("mvp", worldMVP);
                     glDrawElements(GL_TRIANGLES, MapManager.indices.length, GL_UNSIGNED_INT, 0);
-
-
                     
                     tex.bind(0);
                     glBindBuffer(GL_ARRAY_BUFFER, Render.v_id_player);
@@ -249,23 +244,27 @@ public class GameWindow implements Runnable {
                     glDisableVertexAttribArray(glGetAttribLocation(1, "ant"));
                     glDisableVertexAttribArray(glGetAttribLocation(1, "ant_tex"));
                 }
-                GLFW.glfwSwapBuffers(window);
+                
+                glfwSwapBuffers(window);
                 client.setPayload();
                 QueuedCommand.clear();
+                
+//                mouseX = getMouseX();
+//                mouseY = getMouseY();
                 // end tick code
             }
             client.close();
-            GLFW.glfwTerminate();
+            glfwTerminate();
         }
     }
     
         // some input shit
     public static boolean isKeyDown(int keyCode) {
-	return GLFW.glfwGetKey(window, keyCode) == 1;
+	return glfwGetKey(window, keyCode) == 1;
     }
 
     public static boolean isMouseDown(int mouseButton) {
-            return GLFW.glfwGetMouseButton(window, mouseButton) == 1;
+            return glfwGetMouseButton(window, mouseButton) == 1;
     }
 
     public static boolean isKeyPressed(int keyCode) {
@@ -286,13 +285,13 @@ public class GameWindow implements Runnable {
 
     public static double getMouseX() {
             DoubleBuffer buffer = BufferUtils.createDoubleBuffer(1);
-            GLFW.glfwGetCursorPos(window, buffer, null);
+            glfwGetCursorPos(window, buffer, null);
             return buffer.get(0);
     }
 
     public static double getMouseY() {
             DoubleBuffer buffer = BufferUtils.createDoubleBuffer(1);
-            GLFW.glfwGetCursorPos(window, null, buffer);
+            glfwGetCursorPos(window, null, buffer);
             return buffer.get(0);
     }
     

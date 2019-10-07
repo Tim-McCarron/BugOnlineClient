@@ -8,9 +8,7 @@ package duckonline;
 import Util.QueuedCommand;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.joml.Quaternionfc;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 
 /**
@@ -35,7 +33,7 @@ public class Camera {
     public Camera(int width, int height) {
         this.width = width;
         this.height = height;
-        fov = 45.0f;
+        fov = 45f;
         translateX = 0.0f;
         translateY = 0.0f;
         translateZ = 2.0f;
@@ -53,9 +51,7 @@ public class Camera {
         
         model = new Matrix4f().identity();
 //        model.transform(new Vector4f(90f, 0, 90f, 0));
-        model.translate(new Vector3f(x, 1-y, z));
-        
-        
+        model.translate(new Vector3f(x, 1 - y, z));
         
         proj = new Matrix4f().perspective(fov, width / height, 0.4f, 50.0f);
         Matrix4f mvp = proj.mul(view).mul(model);
@@ -64,7 +60,7 @@ public class Camera {
     }
     
     public Matrix4f getMVP(float rotation, float objectRot, float x, float y, float z) {
-        Vector3f camera =  new Vector3f(0, 2, -3.0f);
+        Vector3f camera =  new Vector3f(0, 2, -5.0f);
         Vector3f lookHere = new Vector3f(0, 0, 0);
         Matrix4f view = new Matrix4f().lookAt(
             camera,
@@ -80,10 +76,12 @@ public class Camera {
         objQuat.rotateY( - (float) Math.toRadians(objectRot));
         model.rotate(objQuat);
         
-        Quaternionf quat = new Quaternionf();
-        quat.rotateY((float) Math.toRadians(rotation));
-        view.rotateAround(quat, 0, 0, 0);
-        
+        Quaternionf quatH = new Quaternionf();
+//        Quaternionf quatV = new Quaternionf();
+        quatH.rotateY((float) Math.toRadians(rotation));
+//        quatV.rotateX((float) Math.toRadians(45f));
+        view.rotateAround(quatH, 0, 0, 0);
+//        view.rotateAround(quatV, 0, 0, 0);
         
         
         proj = new Matrix4f().perspective(fov, width / height, 0.1f, 50.0f);
@@ -133,6 +131,14 @@ public class Camera {
         QueuedCommand.sendZ(tz);
     }
     
+    public float getYaw() {
+        return yaw;
+    }
+    
+    public void setYaw(float yaw) {
+        this.yaw = yaw;
+    }
+    
     public void up() {
         float ty = 0.1f;
         translateY += ty;
@@ -147,12 +153,10 @@ public class Camera {
     
     public void zoomIn() {
         fov -= 0.1;
-        System.out.println(fov);
     }
     
     public void zoomOut() {
         fov += 0.1;
-        System.out.println(fov);
     }
     
     public void rotateHorizontal(float angle) {
